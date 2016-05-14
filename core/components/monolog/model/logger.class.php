@@ -92,7 +92,7 @@ class Logger
     {
         unset($entry['content'], $entry['level']);
 
-        $entry['file'] = trim(str_replace('@ ', '', $entry['file']));
+        $entry['file'] = trim(str_replace('@', '', $entry['file']));
         $entry['line'] = trim(str_replace(':', '', $entry['line']));
         $entry['def'] = trim(str_replace('in ', '', $entry['def']));
 
