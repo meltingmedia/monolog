@@ -1,5 +1,11 @@
 {
     "require": {
-        "monolog/monolog": "^1.19"
+        "monolog/monolog": "^1.19",
+        "theorchard/monolog-cascade": "^0.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Melting\\MODX\\Logger\\": "app/"
+        }
     }
 }

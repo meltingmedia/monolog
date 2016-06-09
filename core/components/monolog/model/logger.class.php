@@ -2,16 +2,14 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Cascade\Cascade;
+
 class Logger
 {
     /**
      * @var modX
      */
     public $modx;
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
     /**
      * Pending logs awaiting to be committed/sent to the logger
      *
@@ -35,17 +33,19 @@ class Logger
         foreach ($this->logs as $entry) {
             $level = $this->getLevel($entry['level']);
             $entry = $this->cleanLog($entry);
-            $this->logger->log($level, $entry['msg'], $entry);
+            $this->getLogger()->log($level, $entry['msg'], $entry);
         }
         $this->logs = [];
     }
 
     /**
+     * @param string $name
+     *
      * @return \Monolog\Logger|\Psr\Log\LoggerInterface
      */
-    public function getLogger()
+    public function getLogger($name = 'modx')
     {
-        return $this->logger;
+        return Cascade::getLogger($name);
     }
 
     /**
@@ -58,19 +58,17 @@ class Logger
 
     protected function load()
     {
-        // @TODO allow customization of channel name, handlers & processors
-        $this->logger = new Monolog\Logger(
-            'app',
-            [
-                new Monolog\Handler\StreamHandler($this->getDefaultLogPath(), 'info'),
-            ],
-            [
-                new Monolog\Processor\UidProcessor(),
-                new Monolog\Processor\WebProcessor(),
-            ]
-        );
+        $file = $this->modx->getOption('monolog.config_path');
+        if ($file && file_exists($file)) {
+            $config = require_once $file;
+            $config = array_merge_recursive($this->getDefaultConfig(), $config);
+        } else {
+            $config = $this->getDefaultConfig();
+        }
+        // @see https://github.com/theorchard/monolog-cascade/issues/51 in case we want to merge the default config with a custom one
+        Cascade::fileConfig($config);
 
-        // Make the level as height as possible so Monolog could handle the logs
+        // Make the level as high as possible so Monolog could handle the logs
         $this->modx->setLogLevel(modX::LOG_LEVEL_DEBUG);
         // Register the log target so modX::log could write pending logs in our service
         $this->modx->setLogTarget([
@@ -79,6 +77,40 @@ class Logger
                 'var' => & $this->logs
             ],
         ]);
+    }
+
+    protected function getDefaultConfig()
+    {
+        return [
+//            'disable_existing_loggers' => false,
+//            'formatters' => [
+//
+//            ],
+
+            'processors' => [
+                'uid' => [
+                    'class' => 'Monolog\Processor\UidProcessor',
+                ],
+                'web' => [
+                    'class' => 'Monolog\Processor\WebProcessor',
+                ],
+            ],
+
+            'handlers' => [
+                'core' => [
+                    'class' => 'Monolog\Handler\StreamHandler',
+                    'level' => 'info',
+                    'stream' => $this->getDefaultLogPath(),
+                    'processors' => ['uid', 'web'],
+                ]
+            ],
+
+            'loggers' => [
+                'modx' => [
+                    'handlers' => ['core'],
+                ]
+            ],
+        ];
     }
 
     /**
@@ -92,6 +124,7 @@ class Logger
     {
         unset($entry['content'], $entry['level']);
 
+        $entry['msg'] = trim($entry['msg']);
         $entry['file'] = trim(str_replace('@', '', $entry['file']));
         $entry['line'] = trim(str_replace(':', '', $entry['line']));
         $entry['def'] = trim(str_replace('in ', '', $entry['def']));
