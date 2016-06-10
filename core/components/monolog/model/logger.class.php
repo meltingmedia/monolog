@@ -16,6 +16,7 @@ class Logger
      * @var array
      */
     protected $logs = [];
+    protected $originalLevel = '';
 
     public function __construct(modX $modx, array $options = [])
     {
@@ -49,6 +50,16 @@ class Logger
     }
 
     /**
+     * Get the originally configured MODX log level, formatted to be usable with Monolog
+     *
+     * @return string
+     */
+    public function getOriginalLogLevel()
+    {
+        return $this->originalLevel;
+    }
+
+    /**
      * @return string
      */
     public function getDefaultLogPath()
@@ -56,16 +67,36 @@ class Logger
         return MODX_CORE_PATH . 'cache/logs/error.log';
     }
 
+    public function logFatal()
+    {
+        /**
+         * @see xPDO::_log
+         */
+        //$message = debug_backtrace();
+        $message = error_get_last();
+        if (!$message) {
+            return;
+        }
+        $this->getLogger()->info('Fatal!', $message);
+        if ($message['type'] === E_ERROR) {
+            //echo print_r($message, true);
+            $this->getLogger()->emergency($message['message'], $message);
+        }
+    }
+
     protected function load()
     {
+        register_shutdown_function([$this, 'logFatal']);
+        $this->setOriginalLogLevel();
+
         $file = $this->modx->getOption('monolog.config_path');
         if ($file && file_exists($file)) {
             $config = require_once $file;
+            // @TODO make it optional to merge the config ?
             $config = array_merge_recursive($this->getDefaultConfig(), $config);
         } else {
             $config = $this->getDefaultConfig();
         }
-        // @see https://github.com/theorchard/monolog-cascade/issues/51 in case we want to merge the default config with a custom one
         Cascade::fileConfig($config);
 
         // Make the level as high as possible so Monolog could handle the logs
@@ -79,6 +110,17 @@ class Logger
         ]);
     }
 
+    /**
+     * Store the configured MODX log level
+     */
+    protected function setOriginalLogLevel()
+    {
+        $this->originalLevel = $this->getLevelNameFromInteger($this->modx->getLogLevel());
+    }
+
+    /**
+     * @return array
+     */
     protected function getDefaultConfig()
     {
         return [
@@ -88,20 +130,46 @@ class Logger
 //            ],
 
             'processors' => [
-                'uid' => [
-                    'class' => 'Monolog\Processor\UidProcessor',
+                'psr' => [
+                    'class' => 'Monolog\Processor\PsrLogMessageProcessor',
+                ],
+                'introspection' => [
+                    'class' => 'Monolog\Processor\IntrospectionProcessor',
                 ],
                 'web' => [
                     'class' => 'Monolog\Processor\WebProcessor',
+                ],
+                'memory_usage' => [
+                    'class' => 'Monolog\Processor\MemoryUsageProcessor',
+                ],
+                'memory_peak' => [
+                    'class' => 'Monolog\Processor\MemoryPeakUsageProcessor',
+                ],
+                'process_id' => [
+                    'class' => 'Monolog\Processor\ProcessIdProcessor',
+                ],
+                'uid' => [
+                    'class' => 'Monolog\Processor\UidProcessor',
+                ],
+                'git' => [
+                    'class' => 'Monolog\Processor\GitProcessor',
+                ],
+//                'tags' => [
+//                    'class' => 'Monolog\Processor\TagProcessor',
+//                    'tags' => ['demo', 'test']
+//                ],
+                'modx' => [
+                    'class' => 'Melting\MODX\Logger\Processor\MODXInfo',
+                    'modx' => $this->modx,
                 ],
             ],
 
             'handlers' => [
                 'core' => [
                     'class' => 'Monolog\Handler\StreamHandler',
-                    'level' => 'info',
+                    'level' => $this->getOriginalLogLevel(),
                     'stream' => $this->getDefaultLogPath(),
-                    'processors' => ['uid', 'web'],
+                    //'processors' => ['uid', 'web'],
                 ]
             ],
 
@@ -152,5 +220,28 @@ class Logger
         }
 
         return $level;
+    }
+
+    /**
+     * @param int $int
+     *
+     * @return string
+     */
+    protected function getLevelNameFromInteger($int)
+    {
+        switch ($int) {
+            case MODx::LOG_LEVEL_FATAL:
+                return 'EMERGENCY';
+            case MODx::LOG_LEVEL_ERROR:
+                return 'ERROR';
+            case MODx::LOG_LEVEL_WARN:
+                return 'WARNING';
+            case MODx::LOG_LEVEL_INFO:
+                return 'INFO';
+            case MODx::LOG_LEVEL_DEBUG:
+                return 'DEBUG';
+        }
+
+        return 'ERROR';
     }
 }
