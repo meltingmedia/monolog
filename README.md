@@ -33,3 +33,6 @@ $logger = $modx->getService('logger', 'model.Logger', $path);
 $logger->getLogger('modx')->info('Your log message');
 $logger->getLogger('custom')->info('Log message for your custom logger & its handlers');
 ```
+
+
+> Different configuration per context

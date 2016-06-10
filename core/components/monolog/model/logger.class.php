@@ -4,6 +4,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Cascade\Cascade;
 
+/**
+ * A log service to help ship logs to Monolog
+ */
 class Logger
 {
     /**
@@ -25,7 +28,7 @@ class Logger
     }
 
     /**
-     * Commit all pending logs
+     * Commit all MODX generated pending logs
      *
      * @return void
      */
@@ -40,7 +43,9 @@ class Logger
     }
 
     /**
-     * @param string $name
+     * Get a logger instance
+     *
+     * @param string $name - The logger instance name
      *
      * @return \Monolog\Logger|\Psr\Log\LoggerInterface
      */
@@ -60,6 +65,8 @@ class Logger
     }
 
     /**
+     * Get MODX default log file path
+     *
      * @return string
      */
     public function getDefaultLogPath()
@@ -67,6 +74,11 @@ class Logger
         return MODX_CORE_PATH . 'cache/logs/error.log';
     }
 
+    /**
+     * Handle logging fatal errors
+     *
+     * @return void
+     */
     public function logFatal()
     {
         /**
@@ -77,24 +89,29 @@ class Logger
         if (!$message) {
             return;
         }
-        $this->getLogger()->info('Fatal!', $message);
-        if ($message['type'] === E_ERROR) {
-            //echo print_r($message, true);
+        if ($message['type'] === E_ERROR || $message['type'] === E_USER_ERROR) {
             $this->getLogger()->emergency($message['message'], $message);
         }
     }
 
+    /**
+     * Load our loggers configuration
+     */
     protected function load()
     {
+        // First make sure we could use the logger in case of a fatal error, so we do not miss the notification
         register_shutdown_function([$this, 'logFatal']);
+        // Get the originally configured MODX log level
         $this->setOriginalLogLevel();
 
+        // Check if we have a user defined configuration file
         $file = $this->modx->getOption('monolog.config_path');
         if ($file && file_exists($file)) {
             $config = require_once $file;
             // @TODO make it optional to merge the config ?
             $config = array_merge_recursive($this->getDefaultConfig(), $config);
         } else {
+            // Fallback to the default configuration
             $config = $this->getDefaultConfig();
         }
         Cascade::fileConfig($config);
@@ -119,6 +136,8 @@ class Logger
     }
 
     /**
+     * Get a default configuration, which "mimic" the default MODX log behavior
+     *
      * @return array
      */
     protected function getDefaultConfig()
@@ -195,7 +214,11 @@ class Logger
         $entry['msg'] = trim($entry['msg']);
         $entry['file'] = trim(str_replace('@', '', $entry['file']));
         $entry['line'] = trim(str_replace(':', '', $entry['line']));
-        $entry['def'] = trim(str_replace('in ', '', $entry['def']));
+        if (!empty($entry['def'])) {
+            $entry['def'] = trim(str_replace('in ', '', $entry['def']));
+        } else {
+            unset($entry['def']);
+        }
 
         return $entry;
     }
@@ -223,7 +246,9 @@ class Logger
     }
 
     /**
-     * @param int $int
+     * Get the PSR/Monolog error level name from MODX level (integer)
+     *
+     * @param int $int - The MODX log level (0-4)
      *
      * @return string
      */
@@ -242,6 +267,7 @@ class Logger
                 return 'DEBUG';
         }
 
+        // Should never happen, but just in case, let's fall back to error
         return 'ERROR';
     }
 }
