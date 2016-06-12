@@ -75,12 +75,15 @@ class Logger
     }
 
     /**
-     * Handle logging fatal errors
+     * Handle logging fatal errors & logs inside connectors
      *
      * @return void
      */
-    public function logFatal()
+    public function shutdown()
     {
+        if ($this->modx->response instanceof modConnectorResponse && !empty($this->logs)) {
+            $this->commit();
+        }
         /**
          * @see xPDO::_log
          */
@@ -100,7 +103,7 @@ class Logger
     protected function load()
     {
         // First make sure we could use the logger in case of a fatal error, so we do not miss the notification
-        register_shutdown_function([$this, 'logFatal']);
+        register_shutdown_function([$this, 'shutdown']);
         // Get the originally configured MODX log level
         $this->setOriginalLogLevel();
 
