@@ -81,7 +81,8 @@ class Logger
      */
     public function shutdown()
     {
-        if ($this->modx->response instanceof modConnectorResponse && !empty($this->logs)) {
+        if (!empty($this->logs)) {
+            // Workaround to handle situations where we were not able to commit pending logs
             $this->commit();
         }
         /**
@@ -258,15 +259,15 @@ class Logger
     protected function getLevelNameFromInteger($int)
     {
         switch ($int) {
-            case MODx::LOG_LEVEL_FATAL:
+            case modX::LOG_LEVEL_FATAL:
                 return 'EMERGENCY';
-            case MODx::LOG_LEVEL_ERROR:
+            case modX::LOG_LEVEL_ERROR:
                 return 'ERROR';
-            case MODx::LOG_LEVEL_WARN:
+            case modX::LOG_LEVEL_WARN:
                 return 'WARNING';
-            case MODx::LOG_LEVEL_INFO:
+            case modX::LOG_LEVEL_INFO:
                 return 'INFO';
-            case MODx::LOG_LEVEL_DEBUG:
+            case modX::LOG_LEVEL_DEBUG:
                 return 'DEBUG';
         }
 
