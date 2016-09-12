@@ -1,11 +1,9 @@
 {
+    "repositories": [{
+        "type": "composer",
+        "url": "https://composer.melting-media.com"
+    }],
     "require": {
-        "monolog/monolog": "^1.19",
-        "theorchard/monolog-cascade": "^0.4.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Melting\\MODX\\Logger\\": "app/"
-        }
+        "melting/modx/logger": "@dev"
     }
 }

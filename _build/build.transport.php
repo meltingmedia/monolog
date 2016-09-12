@@ -56,60 +56,23 @@ $builder->createPackage(PKG_NAME_LOWER, PKG_VERSION, PKG_RELEASE);
 $builder->registerNamespace(PKG_NAME_LOWER, false, true, '{core_path}components/'.PKG_NAME_LOWER.'/');
 $modx->log(modX::LOG_LEVEL_INFO, 'Created Transport Package and Namespace.');
 
-$extensions = include_once $sources['data'] . 'extension.php';
+// Let's pack our modExtensionPackage
 $attributes = [
     xPDOTransport::UNIQUE_KEY => 'name',
     xPDOTransport::PRESERVE_KEYS => true,
     xPDOTransport::UPDATE_OBJECT => false,
 ];
-foreach ($extensions as $extension) {
-    $vehicle = $builder->createVehicle($extension, $attributes);
-    $builder->putVehicle($vehicle);
-}
 
-// create the plugin object
-//$plugin= $modx->newObject('modPlugin');
-//$plugin->set('id', 1);
-//$plugin->set('name', PKG_NAME);
-//$plugin->set('description', 'cmpLauncher allows you to display a link or redirect a user to a particular CMP.');
-//$plugin->set('plugincode', getSnippetContent($sources['plugins'] . '/plugin.cmplauncher.php'));
-//$plugin->set('category', 0);
-//
-//// add plugin events
-//$events = include $sources['data'].'transport.plugin.events.php';
-//if (is_array($events) && !empty($events)) {
-//    $plugin->addMany($events);
-//    $modx->log(xPDO::LOG_LEVEL_INFO, 'Packaged in '.count($events).' Plugin Events.');
-//    flush();
-//} else {
-//    $modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not find plugin events!');
-//}
-//unset($events);
-//
-//// load plugin properties
-//$properties = include $sources['build'].'properties/properties.cmpLauncher.php';
-//if (is_array($properties)) {
-//    $modx->log(xPDO::LOG_LEVEL_INFO, 'Set '.count($properties).' plugin properties.');
-//    flush();
-//    $plugin->setProperties($properties);
-//} else {
-//    $modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not set plugin properties.');
-//}
-
-$attributes = [
-    xPDOTransport::UNIQUE_KEY => 'name',
-    xPDOTransport::PRESERVE_KEYS => false,
-    xPDOTransport::UPDATE_OBJECT => true,
-    xPDOTransport::RELATED_OBJECTS => true,
-    xPDOTransport::RELATED_OBJECT_ATTRIBUTES => [
-        'PluginEvents' => [
-            xPDOTransport::PRESERVE_KEYS => true,
-            xPDOTransport::UPDATE_OBJECT => true,
-            xPDOTransport::UNIQUE_KEY => ['pluginid', 'event'],
-        ],
-    ],
-];
-$vehicle = $builder->createVehicle($plugin, $attributes);
+/** @var modExtensionPackage $extension */
+$extension = $modx->newObject('modExtensionPackage');
+$extension->fromArray([
+    'namespace' => 'monolog',
+    'name' => 'monolog',
+    //'path' => '[[++core_path]]components/monolog/',
+    'service_class' => 'Logger',
+    'service_name' => 'logger',
+], '', true, true);
+$vehicle = $builder->createVehicle($extension, $attributes);
 
 $vehicle->resolve('file', [
     'source' => $sources['source_core'],
@@ -124,7 +87,7 @@ $builder->setPackageAttributes([
     'changelog' => file_get_contents($sources['root'] . 'CHANGELOG.md'),
 
     'requires' => [
-        'php' => '>=5.4',
+        'php' => '>=5.5.9',
         //'modx' => '>=2.5',
     ],
 ]);

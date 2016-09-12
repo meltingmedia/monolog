@@ -11,7 +11,7 @@ Using Monolog and its [default handlers](https://github.com/Seldaek/monolog/blob
 ### Requirements
 
 * MODX Revolution 2.5+
-* PHP 5.4+
+* PHP 5.5.9+
 
 
 ### Installation
@@ -36,3 +36,8 @@ $logger->getLogger('custom')->info('Log message for your custom logger & its han
 
 
 > Different configuration per context
+
+
+### To know
+
+Due to how logs are handled, timestamps for logs sent using `$modx->log` won't be accurate
