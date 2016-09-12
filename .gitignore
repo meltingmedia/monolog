@@ -1,1 +1,4 @@
 .idea
+_build/_packages
+_build/build.config.php
+core/components/monolog/vendor

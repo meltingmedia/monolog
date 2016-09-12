@@ -4,6 +4,6 @@
         "url": "https://composer.melting-media.com"
     }],
     "require": {
-        "melting/modx/logger": "@dev"
+        "melting/modx/logger": "^0.1"
     }
 }
