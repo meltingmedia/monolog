@@ -5,4 +5,4 @@
 * First build
 
 
-[v0.1.0]: https://git.melting-media.com/meltinglab/monolog/commits/0.1.0
+[v0.1.0]: https://github.com/meltingmedia/monolog/commits/0.1.0
