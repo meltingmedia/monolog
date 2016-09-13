@@ -27,7 +27,7 @@ You can check the default configuration in `Logger::getDefaultConfig`.
 Things get interesting if you want to use your own loggers to split your application logs.
 Create a PHP file with a valid cascade configuration array (see cascade [configuration](https://github.com/theorchard/monolog-cascade#configuring-your-loggers) for available parameters) and set the full path to your configuration file in `monolog.config_path` setting.
 
-Here is a sample configuration file
+Here is a sample configuration file (check core/components/monolog/config/ folder for some other configuration examples)
 
 ```
 /**
@@ -66,7 +66,6 @@ return [
         ],
     ],
 ];
-
 ```
 
 You should then be able to manipulate those loggers
