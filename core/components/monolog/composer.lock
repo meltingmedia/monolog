@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b50b7a0835ae750ed902f6eeab6de753",
-    "content-hash": "4a0efece9970bb47312320f8dfcee36e",
+    "hash": "10c784d7872266ded89d088db061f59b",
+    "content-hash": "40a9f45ce93001695e873c8337c110bc",
     "packages": [
         {
             "name": "ircmaxell/password-compat",
@@ -51,16 +51,16 @@
         },
         {
             "name": "melting/modx/logger",
-            "version": "0.1.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "git@git.melting-media.com:composer/modx-logger.git",
-                "reference": "d81f50cdc944d85653378467d300a79cb6150a17"
+                "reference": "aa86d70a5179d276dc09cd97a6ea5e882bab00dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://git.melting-media.com/api/v3/projects/composer%2Fmodx-logger/repository/archive.zip?sha=d81f50cdc944d85653378467d300a79cb6150a17",
-                "reference": "d81f50cdc944d85653378467d300a79cb6150a17",
+                "url": "https://git.melting-media.com/api/v3/projects/composer%2Fmodx-logger/repository/archive.zip?sha=aa86d70a5179d276dc09cd97a6ea5e882bab00dc",
+                "reference": "aa86d70a5179d276dc09cd97a6ea5e882bab00dc",
                 "shasum": ""
             },
             "require": {
@@ -91,7 +91,7 @@
                 "modx",
                 "monolog"
             ],
-            "time": "2016-09-12 13:35:43"
+            "time": "2016-09-13 12:31:10"
         },
         {
             "name": "monolog/monolog",
@@ -602,7 +602,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "melting/modx/logger": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

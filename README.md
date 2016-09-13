@@ -31,9 +31,9 @@ Here is a sample configuration file
 
 ```
 /**
- * @var Logger $this
+ * @var \Logger $this
  *
- * @see Logger:getDefaultConfig
+ * @see \Logger::getDefaultConfig
  */
 // Require our project autoloader (if needed) to support third party handlers/processors/formatters...
 require_once __DIR__ . '/../vendor/autoload.php';
