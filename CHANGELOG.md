@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [unreleased]
+## [v0.2.0] - 2016-09-13
 
 * Added a `modMail` handler to send logs via emails using MODX email service
 * The service now complies with `LoggerInterface` so we could `$service->error()` or `$modx->logger->error()`
@@ -12,5 +12,6 @@
 * First build
 
 
-[unreleased]: https://github.com/meltingmedia/monolog/compare/0.1.0...HEAD
+[unreleased]: https://github.com/meltingmedia/monolog/compare/0.2.0...HEAD
+[v0.2.0]: https://github.com/meltingmedia/monolog/compare/0.1.0...0.2.0
 [v0.1.0]: https://github.com/meltingmedia/monolog/commits/0.1.0
